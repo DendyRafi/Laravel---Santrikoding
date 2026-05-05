@@ -9,9 +9,12 @@ use Illuminate\Http\RedirectResponse;
 
 class ProductController extends Controller
 {
+    // ✅ HANYA TAMPILKAN YANG PUBLISH
     public function index(): View
     {
-        $products = Product::latest()->paginate(10);
+        $products = Product::where('status', 'publish')
+            ->latest()
+            ->paginate(10);
 
         return view('products.index', compact('products'));
     }
@@ -40,6 +43,7 @@ class ProductController extends Controller
             'description' => $request->description,
             'price'       => $request->price,
             'stock'       => $request->stock,
+            'status'      => 'publish', // ✅ default publish
         ]);
 
         return redirect()->route('products.index')->with([
@@ -101,11 +105,42 @@ class ProductController extends Controller
     public function destroy(string $id): RedirectResponse
     {
         $product = Product::findOrFail($id);
-
         $product->delete();
 
         return redirect()->route('products.index')->with([
             'success' => 'Data Berhasil Dihapus!'
         ]);
+    }
+
+    // ✅ JADI DRAFT
+    public function draft($id): RedirectResponse
+    {
+        $product = Product::findOrFail($id);
+        $product->status = 'draft';
+        $product->save();
+
+        return redirect()->route('products.index')
+            ->with('success', 'Produk berhasil dijadikan draft');
+    }
+
+    // ✅ HALAMAN LIST DRAFT
+    public function draftList(): View
+    {
+        $products = Product::where('status', 'draft')
+            ->latest()
+            ->paginate(10);
+
+        return view('products.draft', compact('products'));
+    }
+
+    // ✅ BALIK KE PUBLISH
+    public function publish($id): RedirectResponse
+    {
+        $product = Product::findOrFail($id);
+        $product->status = 'publish';
+        $product->save();
+
+        return redirect()->route('products.draftList')
+            ->with('success', 'Produk berhasil dipublish kembali');
     }
 }

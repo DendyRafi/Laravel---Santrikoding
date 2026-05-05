@@ -3,90 +3,127 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Data Products - SantriKoding.com</title>
+    <title>Data Products - SantriKoding</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body style="background: lightgray">
 
-    <div class="container mt-5">
-        <div class="row">
-            <div class="col-md-12">
-                <div>
-                    <h3 class="text-center my-4">Tutorial Laravel 12 untuk Pemula</h3>
-                    <h5 class="text-center"><a href="https://santrikoding.com">www.santrikoding.com</a></h5>
-                    <hr>
-                </div>
-                <div class="card border-0 shadow-sm rounded">
-                    <div class="card-body">
-                        <a href="{{ route('products.create') }}" class="btn btn-md btn-success mb-3">ADD PRODUCT</a>
-                        <table class="table table-bordered">
-                            <thead>
-                                <tr>
-                                    <th scope="col">IMAGE</th>
-                                    <th scope="col">TITLE</th>
-                                    <th scope="col">PRICE</th>
-                                    <th scope="col">STOCK</th>
-                                    <th scope="col" style="width: 20%">ACTIONS</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse ($products as $product)
-                                    <tr>
-                                        <td class="text-center">
-                                            <img src="{{ asset('storage/products/'.$product->image) }}" class="rounded" style="width: 150px">
-                                        </td>
-                                        <td>{{ $product->title }}</td>
-                                        <td>{{ "Rp " . number_format($product->price,2,',','.') }}</td>
-                                        <td>{{ $product->stock }}</td>
-                                        <td class="text-center">
-                                            <form onsubmit="return confirm('Apakah Anda Yakin ?');" action="{{ route('products.destroy', $product->id) }}" method="POST">
-                                                <a href="{{ route('products.show', $product->id) }}" class="btn btn-sm btn-dark">SHOW</a>
-                                                <a href="{{ route('products.edit', $product->id) }}" class="btn btn-sm btn-primary">EDIT</a>
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-sm btn-danger">HAPUS</button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <div class="alert alert-danger">
-                                        Data Products belum ada.
-                                    </div>
-                                @endforelse
-                            </tbody>
-                        </table>
-                        {{ $products->links() }}
-                    </div>
-                </div>
-            </div>
-        </div>
+<div class="container mt-5">
+
+    <!-- ✅ HEADER (DITAMBAHKAN LAGI) -->
+    <div>
+        <h3 class="text-center my-4">Tutorial Laravel 12 untuk Pemula</h3>
+        <h5 class="text-center">
+            <a href="https://santrikoding.com">www.santrikoding.com</a>
+        </h5>
+        <hr>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <div class="card shadow-sm">
+        <div class="card-body">
 
-    <script>
-        //message with sweetalert
-        @if(session('success'))
-            Swal.fire({
-                icon: "success",
-                title: "BERHASIL",
-                text: "{{ session('success') }}",
-                showConfirmButton: false,
-                timer: 2000
-            });
-        @elseif(session('error'))
-            Swal.fire({
-                icon: "error",
-                title: "GAGAL!",
-                text: "{{ session('error') }}",
-                showConfirmButton: false,
-                timer: 2000
-            });
-        @endif
+            <!-- ✅ BUTTON ATAS -->
+            <div class="d-flex justify-content-between mb-3">
+                <a href="{{ route('products.create') }}" class="btn btn-success">
+                    ADD PRODUCT
+                </a>
 
-    </script>
+                <a href="{{ route('products.draftList') }}" class="btn btn-warning">
+                    LIHAT DRAFT
+                </a>
+            </div>
+
+            <!-- TABLE -->
+            <table class="table table-bordered align-middle">
+                <thead>
+                    <tr>
+                        <th class="text-center">IMAGE</th>
+                        <th>TITLE</th>
+                        <th>PRICE</th>
+                        <th>STOCK</th>
+                        <th class="text-center">STATUS</th>
+                        <th class="text-center">ACTIONS</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                @forelse ($products as $product)
+                    <tr>
+                        <td class="text-center">
+                            <img src="{{ asset('storage/products/'.$product->image) }}" width="120" class="rounded">
+                        </td>
+
+                        <td>{{ $product->title }}</td>
+
+                        <td>Rp {{ number_format($product->price,2,',','.') }}</td>
+
+                        <td>{{ $product->stock }}</td>
+
+                        <!-- STATUS -->
+                        <td class="text-center">
+                            <span class="badge bg-success">PUBLISH</span>
+                        </td>
+
+                        <!-- ACTIONS -->
+                        <td class="text-center">
+
+                            <!-- SHOW -->
+                            <a href="{{ route('products.show', $product->id) }}" 
+                               class="btn btn-sm btn-dark">
+                               SHOW
+                            </a>
+
+                            <!-- EDIT -->
+                            <a href="{{ route('products.edit', $product->id) }}" 
+                               class="btn btn-sm btn-primary">
+                               EDIT
+                            </a>
+
+                            <!-- DRAFT -->
+                            <form action="{{ route('products.draft', $product->id) }}" 
+                                  method="POST" 
+                                  style="display:inline;">
+                                @csrf
+                                @method('PATCH')
+                                <button class="btn btn-sm btn-warning">
+                                    DRAFT
+                                </button>
+                            </form>
+
+                            <!-- DELETE -->
+                            <form action="{{ route('products.destroy', $product->id) }}" 
+                                  method="POST" 
+                                  style="display:inline;">
+                                @csrf
+                                @method('DELETE')
+                                <button class="btn btn-sm btn-danger"
+                                    onclick="return confirm('Yakin hapus?')">
+                                    HAPUS
+                                </button>
+                            </form>
+
+                        </td>
+                    </tr>
+
+                @empty
+                    <tr>
+                        <td colspan="6" class="text-center">
+                            Data belum ada
+                        </td>
+                    </tr>
+                @endforelse
+
+                </tbody>
+            </table>
+
+            <!-- PAGINATION -->
+            <div class="mt-3">
+                {{ $products->links() }}
+            </div>
+
+        </div>
+    </div>
+</div>
 
 </body>
 </html>
